@@ -1,7 +1,7 @@
 from logging.config import fileConfig
 
 from alembic import context
-from sqlalchemy import engine_from_config
+from sqlalchemy import engine_from_config, MetaData
 from sqlalchemy import pool
 
 from hotel_reservation.models import hotel, room
@@ -15,11 +15,25 @@ config = context.config
 # This line sets up loggers basically.
 fileConfig(config.config_file_name)
 
+
 # add your model's MetaData object here
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = [hotel.Base.metadata, room.Base.metadata]
+
+from hotel_reservation.models import hotel, room
+
+
+def combine_metadata(*args):
+    m = MetaData()
+    for metadata in args:
+        for t in metadata.tables.values():
+            t.tometadata(m)
+    return m
+
+
+target_metadata = combine_metadata(hotel.Base.metadata, room.Base.metadata)
+
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

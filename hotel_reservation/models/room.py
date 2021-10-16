@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, ForeignKey
-from sqlalchemy.orm import Session, relationship
+from sqlalchemy.orm import Session, relationship, declarative_base
 
-from hotel_reservation.models import Base
+Base = declarative_base()
 
 
 class Room(Base):
