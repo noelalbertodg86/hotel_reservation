@@ -21,7 +21,7 @@ fileConfig(config.config_file_name)
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 
-from hotel_reservation.models import hotel, room
+from hotel_reservation.models import hotel, room, reservation
 
 
 def combine_metadata(*args):
@@ -32,7 +32,7 @@ def combine_metadata(*args):
     return m
 
 
-target_metadata = combine_metadata(hotel.Base.metadata, room.Base.metadata)
+target_metadata = combine_metadata(hotel.Base.metadata, room.Base.metadata, reservation.Base.metadata)
 
 
 # other values from the config, defined by the needs of env.py,
