@@ -1,12 +1,15 @@
-from sqlalchemy import Column, String, Integer
-from sqlalchemy.orm import relationship, declarative_base
+from typing import List, Optional
 
-Base = declarative_base()
+from sqlalchemy.orm import Session
+
+from hotel_reservation.models.models import Room, Hotel
 
 
-class Hotel(Base):
-    __tablename__ = "hotel"
-    id = Column(Integer, autoincrement=True, primary_key=True)
-    name = Column(String(250))
-    address = Column(String(250))
-    rooms = relationship("Room", back_populates="hotel")
+class HotelDAO:
+    def __init__(self, session: Session):
+        self.session = session
+
+    def create(self, name: str, address: str, rooms: Optional[List[Room]]):
+        hotel = Hotel(name=name, address=address, rooms=rooms)
+        self.session.add(hotel)
+        self.session.commit()

@@ -1,14 +1,11 @@
 from database import session_factory
-from hotel_reservation.models.hotel import Hotel
-from hotel_reservation.models.room import Room
+from hotel_reservation.models.models import Hotel, Room
 
 try:
     session = session_factory()
 
-    hotel = Hotel()
-    hotel.address = "Cancun"
-    hotel.name = "Unique Royal"
-    hotel.rooms = Room(number=101)
+    hotel = Hotel(name="Unique Royal", address="Cancun")
+    hotel.rooms.append(Room(number=101))
 
     session.add(hotel)
     session.commit()

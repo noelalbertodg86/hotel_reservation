@@ -1,10 +1,8 @@
 from logging.config import fileConfig
 
 from alembic import context
-from sqlalchemy import engine_from_config, MetaData
+from sqlalchemy import engine_from_config
 from sqlalchemy import pool
-
-from hotel_reservation.models import hotel, room
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -21,18 +19,9 @@ fileConfig(config.config_file_name)
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 
-from hotel_reservation.models import hotel, room, reservation
+from hotel_reservation.models import models
 
-
-def combine_metadata(*args):
-    m = MetaData()
-    for metadata in args:
-        for t in metadata.tables.values():
-            t.tometadata(m)
-    return m
-
-
-target_metadata = combine_metadata(hotel.Base.metadata, room.Base.metadata, reservation.Base.metadata)
+target_metadata = [models.Base.metadata]
 
 
 # other values from the config, defined by the needs of env.py,

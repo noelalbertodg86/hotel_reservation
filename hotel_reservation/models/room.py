@@ -1,12 +1,17 @@
-from sqlalchemy import Column, Integer, ForeignKey
-from sqlalchemy.orm import relationship, declarative_base
+from sqlalchemy.orm import Session
 
-Base = declarative_base()
+from hotel_reservation.models.models import Room
 
 
-class Room(Base):
-    __tablename__ = "room"
-    id = Column(Integer, autoincrement=True, primary_key=True)
-    number = Column(Integer)
-    hotel_id = Column(Integer, ForeignKey("hotel.id"), nullable=False)
-    hotel = relationship("Hotel", back_populates="rooms")
+class RoomDAO:
+    def __init__(self, session: Session):
+        self.session = session
+
+    def create(self, number: int, hotel_id: int):
+        try:
+            room = Room(number=number, hotel_id=hotel_id)
+            self.session.add(room)
+            self.session.commit()
+        except Exception as exception:
+            self.session.rollback()
+            raise exception
