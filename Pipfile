@@ -4,12 +4,15 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+pytest = "*"
+faker = "*"
 
 [packages]
 fastapi = "*"
 uvicorn = "*"
 sqlalchemy = "*"
 alembic = "*"
+pydantic = "*"
 
 [requires]
 python_version = "3.8"

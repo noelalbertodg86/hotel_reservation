@@ -2,7 +2,9 @@ import uvicorn
 from fastapi import FastAPI
 
 from hotel_reservation import config
-from hotel_reservation.controllers.reservation import router as reservation_router
+from hotel_reservation.controllers.reservation.reservation_controller import (
+    router as reservation_router,
+)
 
 app = FastAPI()
 app.include_router(reservation_router)

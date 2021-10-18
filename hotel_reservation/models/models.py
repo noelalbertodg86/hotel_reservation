@@ -8,6 +8,7 @@ from sqlalchemy import (
     DateTime,
     BigInteger,
     UniqueConstraint,
+    Numeric,
 )
 from sqlalchemy.orm import relationship, declarative_base
 
@@ -22,36 +23,44 @@ class Hotel(Base):
     rooms = relationship("Room", back_populates="hotel")
 
 
+class RoomReservation(Base):
+    __tablename__ = "room_reservation"
+    date = Column(Date, primary_key=True)
+    room_id = Column(ForeignKey("room.id", ondelete="CASCADE"), primary_key=True)
+    reservation_id = Column(
+        ForeignKey("reservation.id", ondelete="CASCADE"), primary_key=True
+    )
+
+    room = relationship("Room", back_populates="reservations")
+    reservation = relationship("Reservation", back_populates="rooms")
+
+    __table_args__ = (
+        UniqueConstraint("date", "room_id", name="reservation_unique_day"),
+    )
+
+
 class Room(Base):
     __tablename__ = "room"
     id = Column(Integer, autoincrement=True, primary_key=True)
     number = Column(Integer)
-    hotel_id = Column(Integer, ForeignKey("hotel.id"), nullable=False)
+    type = Column(String(50), server_default="Simple")
+    price_per_day = Column(Numeric(10, 2), server_default="50.50")
+    hotel_id = Column(
+        Integer, ForeignKey("hotel.id", ondelete="CASCADE"), nullable=False
+    )
     hotel = relationship("Hotel", back_populates="rooms")
-    reservations = relationship("Reservation", back_populates="room")
+    reservations = relationship("RoomReservation", back_populates="room")
 
 
 class Reservation(Base):
     __tablename__ = "reservation"
     id = Column(Integer, autoincrement=True, primary_key=True)
+    observations = Column(String(250), server_default="")
+    guest_id = Column(String(25), ForeignKey("guest.id"))
+    guest = relationship("Guest", back_populates="reservation")
+    rooms = relationship("RoomReservation", back_populates="reservation")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
-    room_id = Column(Integer, ForeignKey("room.id"), nullable=False)
-    room = relationship("Room", back_populates="reservation")
-    guest_id = Column(String(25), ForeignKey("guest.id"), nullable=False)
-    guest = relationship("Guest", back_populates="reservation")
-    dates = relationship("ReservationDate", back_populates="reservation")
-
-
-class ReservationDate(Base):
-    __tablename__ = "reservation_date"
-    id = Column(Integer, autoincrement=True, primary_key=True)
-    date = Column(Date, nullable=False)
-    reservation_id = Column(Integer, ForeignKey("reservation.id"), nullable=False)
-    reservation = relationship("Reservation", back_populates="reservation_date")
-    __table_args__ = (
-        UniqueConstraint("date", "reservation_id", name="reservation_unique_day"),
-    )
 
 
 class Guest(Base):
@@ -60,4 +69,4 @@ class Guest(Base):
     full_name = Column(String(200))
     email = Column(String(50))
     phone_number = Column(BigInteger)
-    reservations = relationship("Reservation", back_populates="guest")
+    reservation = relationship("Reservation", back_populates="guest")
