@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel
 
-from hotel_reservation.controllers.reservation.schemas.guest_schema import Guest
+from hotel_reservation.controllers.schemas.guest_schema import Guest
 
 
 class ReservationBase(BaseModel):

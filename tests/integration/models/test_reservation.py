@@ -32,6 +32,39 @@ def test_should_create_a_reservation_when_create_method_is_called(db_session, fa
     assert created_reservation.id >= 1
 
 
+def test_should_create_a_reservations_with_same_guest_in_distinct_dates_when_create_method_is_called(
+    db_session, faker
+):
+    reservation_data_model = ReservationDAO(db_session)
+    today = date.today()
+    tomorrow = today + timedelta(days=1)
+    reservation_dates = [today, tomorrow]
+    observations = "Room with seaview"
+    room_id = 1
+    guest = Guest(
+        id=faker.pyint(),
+        full_name=faker.name(),
+        email=faker.email(),
+        phone_number=faker.msisdn(),
+    )
+    created_reservation = reservation_data_model.create(
+        reservation_dates=reservation_dates,
+        observations=observations,
+        room_id=room_id,
+        guest=guest,
+    )
+
+    second_created_reservation = reservation_data_model.create(
+        reservation_dates=[date(2022, 1, 20), date(2022, 1, 23)],
+        observations=observations,
+        room_id=room_id,
+        guest=guest,
+    )
+
+    assert created_reservation.id >= 1
+    assert second_created_reservation.id >= 1
+
+
 def test_should_raise_an_error_when_duplicated_reservation_date_and_room_is_given(
     db_session, faker
 ):
@@ -42,7 +75,7 @@ def test_should_raise_an_error_when_duplicated_reservation_date_and_room_is_give
     observations = "Room with seaview"
     room_id = 1
     guest = Guest(
-        id=faker.text(10),
+        id=faker.pyint(),
         full_name=faker.name(),
         email=faker.email(),
         phone_number=faker.msisdn(),
@@ -64,7 +97,4 @@ def test_should_raise_an_error_when_duplicated_reservation_date_and_room_is_give
             room_id=room_id,
             guest=guest,
         )
-    import pdb
-
-    pdb.set_trace()
     assert isinstance(duplicated_reservation_error.value, DuplicatedReservationError)

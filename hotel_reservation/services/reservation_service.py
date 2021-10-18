@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from hotel_reservation.controllers.reservation.schemas.reservation_schemas import (
+from hotel_reservation.controllers.schemas.reservation_schemas import (
     ReservationRequest,
     ReservationCreated,
 )

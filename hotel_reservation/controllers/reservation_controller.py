@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Response, status
 
 from database import session_factory
-from hotel_reservation.controllers.reservation.schemas.reservation_schemas import (
+from hotel_reservation.controllers.schemas.reservation_schemas import (
     ReservationRequest,
     ReservationCreated,
 )
@@ -18,7 +18,7 @@ def health_check():
     return {"status": "UP"}
 
 
-@router.post("/reservation/", response_model=ReservationCreated)
-def create_user(response: Response, reservation: ReservationRequest):
+@router.post("/v1/reservation/", response_model=ReservationCreated)
+async def create_user(response: Response, reservation: ReservationRequest):
     response.status_code = status.HTTP_201_CREATED
     return reservation_service.create(reservation)
