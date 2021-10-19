@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 
 from sqlalchemy.orm import Session
 
@@ -60,22 +60,23 @@ class ReservationService:
         confirmation_number: int,
     ) -> ReservationUpdatedSchema:
 
-        guest = Guest(**update_reservation_request.guest.dict())
-
-        room_reservations = [
-            RoomReservation(date=date, room_id=update_reservation_request.room_id)
-            for date in update_reservation_request.dates
-        ]
-
-        new_reservation = Reservation(
-            observations=update_reservation_request.observations,
-            room_reservations=room_reservations,
-            guest=guest,
-            guest_id=guest.id,
+        reservation_to_update = self.reservation_dao.get_reservation_by_id(
+            reservation_id=confirmation_number
         )
-        updated_reservation = self.reservation_dao.update(
-            confirmation_number, new_reservation
+        if not reservation_to_update:
+            raise NotFoundReservationError(confirmation_number)
+
+        reservation_to_update.observations = update_reservation_request.observations
+        reservation_to_update.updated_at = datetime.now()
+        reservation_to_update.guest.email = update_reservation_request.guest.email
+        reservation_to_update.guest.phone_number = (
+            update_reservation_request.guest.phone_number
         )
+        reservation_to_update.guest.full_name = (
+            update_reservation_request.guest.full_name
+        )
+
+        updated_reservation = self.reservation_dao.update(reservation_to_update)
 
         return ReservationUpdatedSchema.build_from_reservation_model(
             updated_reservation

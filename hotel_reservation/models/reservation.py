@@ -26,24 +26,11 @@ class ReservationDAO:
             self.session.rollback()
             raise unexpected_error
 
-    def update(self, reservation_id: int, new_reservation: Reservation) -> Reservation:
+    def update(self, reservation: Reservation) -> Reservation:
         try:
-            actual_reservation = self.get_reservation_by_id(reservation_id)
-            if not actual_reservation:
-                raise NotFoundReservationError(reservation_id)
-
-            actual_reservation.observations = new_reservation.observations
-            actual_reservation.guest.full_name = new_reservation.guest.full_name
-            actual_reservation.guest.email = new_reservation.guest.email
-            actual_reservation.guest.phone_number = new_reservation.guest.phone_number
-
-            for room_reservation in actual_reservation.room_reservations:
-                self.session.delete(room_reservation)
-
-            actual_reservation.room_reservations = new_reservation.room_reservations
-            self.session.merge(actual_reservation)
+            self.session.merge(reservation)
             self.session.commit()
-            return actual_reservation
+            return reservation
         except Exception as error:
             self.session.rollback()
             raise error
