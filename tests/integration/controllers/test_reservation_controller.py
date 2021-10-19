@@ -1,11 +1,18 @@
 import copy
+from datetime import date, timedelta
 
 import pytest
 from fastapi.testclient import TestClient
 from fastapi import status, HTTPException
+from sqlalchemy.orm import Session
 
 from hotel_reservation.controllers.reservation_controller import (
     router as reservation_router,
+)
+from hotel_reservation.models.models import Reservation
+from tests.integration.utils.reservation_test_utils import (
+    build_object_reservation,
+    create_reservation_for_testing_purposes,
 )
 
 client = TestClient(reservation_router)
@@ -71,12 +78,38 @@ def test_should_return_409_status_conflict_when_a_reservation_is_duplicated(fake
         client.post(create_reservation_url, json=new_guest_reservation)
 
     assert duplicated_reservation.value.status_code == status.HTTP_409_CONFLICT
-    expected_error_message = "Duplicated reservation. Room: 1, Dates: ['2021-10-17', '2021-10-18', '2021-10-19']"
+    expected_error_message = (
+        f"Duplicated reservation. Room: 1, Dates: {CREATE_RESERVATION_PAYLOAD['dates']}"
+    )
     assert duplicated_reservation.value.detail == expected_error_message
 
 
+def test_should_update_a_reservation_and_return_200_when_update_reservation_endpoint_is_called(
+    faker, db_session
+):
+    room_id = 1
+    start_day = date.today() + timedelta(days=10)
+    second_day = start_day + timedelta(days=1)
+    reservation_days = [start_day, second_day]
+    reservation = build_object_reservation(faker, room_id, reservation_days, "")
+    reservation = create_reservation_for_testing_purposes(db_session, reservation)
+
+    existing_reservation_confirmation_number = reservation.id
+
+    create_reservation_url = (
+        f"/v1/reservation/{existing_reservation_confirmation_number}"
+    )
+    response = client.put(create_reservation_url, json=CREATE_RESERVATION_PAYLOAD)
+
+    assert response.status_code == status.HTTP_200_OK
+
+
 CREATE_RESERVATION_PAYLOAD = {
-    "dates": ["2021-10-17", "2021-10-18", "2021-10-19"],
+    "dates": [
+        f"{date.today() + timedelta(days=15)}",
+        f"{date.today() + timedelta(days=16)}",
+        f"{date.today() + timedelta(days=17)}",
+    ],
     "guest": {
         "id": "13131313",
         "full_name": "Noel Diaz",

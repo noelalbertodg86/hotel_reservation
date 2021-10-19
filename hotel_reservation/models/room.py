@@ -1,17 +1,22 @@
+from datetime import date
+
+from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
-from hotel_reservation.models.models import Room
+from hotel_reservation.models.models import Room, RoomReservation, Reservation
 
 
 class RoomDAO:
     def __init__(self, session: Session):
         self.session = session
 
-    def create(self, number: int, hotel_id: int):
-        try:
-            room = Room(number=number, hotel_id=hotel_id)
-            self.session.add(room)
-            self.session.commit()
-        except Exception as exception:
-            self.session.rollback()
-            raise exception
+    def get_room_booked_dates(self, start_date: date, end_date: date, room_id: int) -> RoomReservation:
+        reservation_dates = self.session.query(RoomReservation).filter(and_(RoomReservation.date >= start_date,
+                                                                            RoomReservation.date <= end_date,
+                                                                            RoomReservation.room_id == room_id)).all()
+        return reservation_dates
+
+    def get_room(self, room_id: int = 0):
+        if room_id:
+            return self.session.query(Room).get(room_id)
+        return self.session.query(Room).first()

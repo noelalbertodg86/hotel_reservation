@@ -26,13 +26,16 @@ class Hotel(Base):
 class RoomReservation(Base):
     __tablename__ = "room_reservation"
     date = Column(Date, primary_key=True)
-    room_id = Column(ForeignKey("room.id", ondelete="CASCADE"), primary_key=True)
+    room_id = Column(
+        ForeignKey("room.id", ondelete="CASCADE", onupdate="CASCADE"), primary_key=True
+    )
     reservation_id = Column(
-        ForeignKey("reservation.id", ondelete="CASCADE"), primary_key=True
+        ForeignKey("reservation.id", ondelete="CASCADE", onupdate="CASCADE"),
+        primary_key=True,
     )
 
     room = relationship("Room", back_populates="reservations")
-    reservation = relationship("Reservation", back_populates="rooms")
+    reservation = relationship("Reservation", back_populates="room_reservations")
 
     __table_args__ = (
         UniqueConstraint("date", "room_id", name="reservation_unique_day"),
@@ -58,9 +61,17 @@ class Reservation(Base):
     observations = Column(String(250), server_default="")
     guest_id = Column(String(25), ForeignKey("guest.id"))
     guest = relationship("Guest", back_populates="reservation")
-    rooms = relationship("RoomReservation", back_populates="reservation")
+    room_reservations = relationship(
+        "RoomReservation", back_populates="reservation", cascade="all, delete"
+    )
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    def get_dates_to_str(self):
+        return list(map(str, self.get_dates()))
+
+    def get_dates(self):
+        return [room_reservation.date for room_reservation in self.room_reservations]
 
 
 class Guest(Base):

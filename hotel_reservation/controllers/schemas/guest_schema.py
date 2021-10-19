@@ -4,8 +4,10 @@ from typing import Optional
 
 from pydantic import BaseModel, validator
 
+from hotel_reservation.models.models import Guest
 
-class Guest(BaseModel):
+
+class GuestSchema(BaseModel):
     id: str
     full_name: str
     email: str
@@ -24,3 +26,12 @@ class Guest(BaseModel):
         if re.fullmatch(phone_regex, phone_number):
             return phone_number
         raise HTTPException(status_code=400, detail="Invalid phone number")
+
+    @staticmethod
+    def build_from_guest_data_model(guest_data_model: Guest):
+        return GuestSchema(
+            id=guest_data_model.id,
+            full_name=guest_data_model.full_name,
+            email=guest_data_model.email,
+            phone_number=guest_data_model.phone_number,
+        )
