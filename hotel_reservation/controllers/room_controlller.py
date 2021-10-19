@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Response, status
 
 from database import session_factory
-from hotel_reservation.controllers.schemas.room_schema import RoomAvailabilityDatesSchema
+from hotel_reservation.controllers.schemas.room_schema import (
+    RoomAvailabilityDatesSchema,
+)
 from hotel_reservation.services.room_services import RoomServices
 
 router = APIRouter()

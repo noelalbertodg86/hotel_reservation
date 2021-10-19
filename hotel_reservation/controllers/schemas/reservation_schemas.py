@@ -4,7 +4,6 @@ from typing import List, Optional
 from pydantic import BaseModel
 
 from hotel_reservation.controllers.schemas.guest_schema import GuestSchema
-from hotel_reservation.controllers.schemas.room_schema import RoomAvailabilityDatesSchema
 from hotel_reservation.models.models import Reservation
 
 
@@ -59,3 +58,7 @@ class ReservationUpdatedSchema(ReservationBase):
 class ReservationDeletedSchema(BaseModel):
     confirmation_number: int
     message: str = "Reservation deleted successfully"
+
+
+class ReservationSelectedSchema(ReservationCreatedSchema):
+    pass

@@ -7,6 +7,7 @@ from hotel_reservation.controllers.schemas.reservation_schemas import (
     ReservationCreatedSchema,
     ReservationUpdatedSchema,
     ReservationDeletedSchema,
+    ReservationSelectedSchema,
 )
 from hotel_reservation.exceptions.reservation_exceptions import NotFoundReservationError
 from hotel_reservation.models.guest import GuestDAO
@@ -19,6 +20,14 @@ class ReservationService:
         self.session = session
         self.reservation_dao = ReservationDAO(session=session)
         self.guest_dao = GuestDAO(session=session)
+
+    def get_reservation(self, confirmation_number: int) -> ReservationSelectedSchema:
+        reservation = self.reservation_dao.get_reservation_by_id(
+            reservation_id=confirmation_number
+        )
+        if not reservation:
+            raise NotFoundReservationError(confirmation_number)
+        return ReservationSelectedSchema.build_from_reservation_model(reservation)
 
     def create(
         self, reservation_request: ReservationRequestSchema
@@ -79,7 +88,3 @@ class ReservationService:
 
         self.reservation_dao.delete(reservation)
         return ReservationDeletedSchema(confirmation_number=confirmation_number)
-
-
-
-

@@ -5,13 +5,22 @@ from hotel_reservation.controllers.schemas.reservation_schemas import (
     ReservationRequestSchema,
     ReservationCreatedSchema,
     ReservationUpdatedSchema,
-    ReservationDeletedSchema)
+    ReservationDeletedSchema,
+    ReservationSelectedSchema,
+)
 from hotel_reservation.services.reservation_service import ReservationService
 
 router = APIRouter()
 
 db_session = session_factory()
 reservation_service = ReservationService(session=db_session)
+
+
+@router.get(
+    "/v1/reservation/{confirmation_number}", response_model=ReservationSelectedSchema
+)
+def get_reservation(confirmation_number: int):
+    return reservation_service.get_reservation(confirmation_number)
 
 
 @router.post("/v1/reservation/", response_model=ReservationCreatedSchema)
