@@ -15,6 +15,20 @@ try:
 
     session.add(hotel)
     session.add(guest)
+
+    reservation_rules = [
+        ReservationRules(code=ReservationRulesCodes.RESERVE_MAX_ALLOWED_DAYS, value=3),
+        ReservationRules(
+            code=ReservationRulesCodes.RESERVE_MAX_ALLOWED_BOOKING_IN_ADVANCE_DAYS,
+            value=30,
+        ),
+        ReservationRules(
+            code=ReservationRulesCodes.RESERVE_MIN_ALLOWED_DAYS_BETWEEN_BOOK_AND_RESERVATION_BEGIN,
+            value=1,
+        ),
+    ]
+
+    session.add_all(reservation_rules)
     session.commit()
 
 

@@ -13,6 +13,7 @@ from hotel_reservation.exceptions.reservation_exceptions import NotFoundReservat
 from hotel_reservation.models.guest import GuestDAO
 from hotel_reservation.models.models import Guest, RoomReservation, Reservation
 from hotel_reservation.models.reservation import ReservationDAO
+from hotel_reservation.services.reservation_rules_service import ReservationRulesService
 
 
 class ReservationService:
@@ -20,6 +21,9 @@ class ReservationService:
         self.session = session
         self.reservation_dao = ReservationDAO(session=session)
         self.guest_dao = GuestDAO(session=session)
+        self.reservation_rules_validators = ReservationRulesService(
+            session
+        ).get_rules_validators()
 
     def get_reservation(self, confirmation_number: int) -> ReservationSelectedSchema:
         reservation = self.reservation_dao.get_reservation_by_id(
@@ -47,6 +51,8 @@ class ReservationService:
             guest=guest,
             guest_id=reservation_request.guest.id,
         )
+
+        self.validate_reservation(reservation)
 
         created_reservation = self.reservation_dao.create(reservation)
 
@@ -82,7 +88,7 @@ class ReservationService:
             RoomReservation(date=date, room_id=update_reservation_request.room_id)
             for date in update_reservation_request.dates
         ]
-
+        self.validate_reservation(reservation_to_update)
         updated_reservation = self.reservation_dao.update(reservation_to_update)
 
         return ReservationUpdatedSchema.build_from_reservation_model(
@@ -96,3 +102,10 @@ class ReservationService:
 
         self.reservation_dao.delete(reservation)
         return ReservationDeletedSchema(confirmation_number=confirmation_number)
+
+    def validate_reservation(self, reservation: Reservation):
+        validation_result = [
+            validator.validate(reservation)
+            for validator in self.reservation_rules_validators
+        ]
+        return all(validation_result)

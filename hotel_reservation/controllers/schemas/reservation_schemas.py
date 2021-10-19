@@ -22,14 +22,16 @@ class ReservationRequestSchema(ReservationBase):
     @validator("dates")
     def validate_dates(cls, dates: List[date]):
         if len(dates) == 0:
-            raise HTTPException(status_code=400, detail="Reservation dates must have at least 1 element")
+            raise HTTPException(
+                status_code=400, detail="Reservation dates must have at least 1 element"
+            )
         dates.sort()
         for i in range(len(dates) - 1):
             if dates[i] + timedelta(days=1) != dates[i + 1]:
-                raise HTTPException(status_code=400, detail="Reservation dates must be consecutive")
+                raise HTTPException(
+                    status_code=400, detail="Reservation dates must be consecutive"
+                )
         return dates
-
-
 
 
 class ReservationCreatedSchema(ReservationBase):

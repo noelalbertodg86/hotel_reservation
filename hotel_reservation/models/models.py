@@ -1,3 +1,5 @@
+import enum
+
 from sqlalchemy import (
     Column,
     String,
@@ -8,7 +10,8 @@ from sqlalchemy import (
     DateTime,
     BigInteger,
     UniqueConstraint,
-    Numeric,
+    Enum,
+    Boolean,
 )
 from sqlalchemy.orm import relationship, declarative_base
 
@@ -47,7 +50,6 @@ class Room(Base):
     id = Column(Integer, autoincrement=True, primary_key=True)
     number = Column(Integer)
     type = Column(String(50), server_default="Simple")
-    price_per_day = Column(Numeric(10, 2), server_default="50.50")
     hotel_id = Column(
         Integer, ForeignKey("hotel.id", ondelete="CASCADE"), nullable=False
     )
@@ -81,3 +83,21 @@ class Guest(Base):
     email = Column(String(50))
     phone_number = Column(BigInteger)
     reservation = relationship("Reservation", back_populates="guest")
+
+
+class ReservationRulesCodes(enum.Enum):
+    RESERVE_MAX_ALLOWED_DAYS = "RESERVE_MAX_ALLOWED_DAYS"
+    RESERVE_MAX_ALLOWED_BOOKING_IN_ADVANCE_DAYS = (
+        "RESERVE_MAX_ALLOWED_BOOKING_IN_ADVANCE_DAYS"
+    )
+    RESERVE_MIN_ALLOWED_DAYS_BETWEEN_BOOK_AND_RESERVATION_BEGIN = (
+        "RESERVE_MIN_ALLOWED_DAYS_BETWEEN_BOOK_AND_RESERVATION_BEGIN"
+    )
+
+
+class ReservationRules(Base):
+    __tablename__ = "reservation_rules"
+    id = Column(Integer, autoincrement=True, primary_key=True)
+    code = Column(Enum(ReservationRulesCodes), nullable=False, unique=True)
+    value = Column(Integer)
+    active = Column(Boolean, server_default="1")
