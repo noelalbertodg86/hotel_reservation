@@ -75,6 +75,13 @@ class ReservationService:
         reservation_to_update.guest.full_name = (
             update_reservation_request.guest.full_name
         )
+        for room_reservation in reservation_to_update.room_reservations:
+            self.session.delete(room_reservation)
+
+        reservation_to_update.room_reservations = [
+            RoomReservation(date=date, room_id=update_reservation_request.room_id)
+            for date in update_reservation_request.dates
+        ]
 
         updated_reservation = self.reservation_dao.update(reservation_to_update)
 
