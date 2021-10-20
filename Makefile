@@ -15,3 +15,8 @@ unit-test:
 int-test: db-reset
 	pipenv run seed
 	pipenv run pytest tests/integration
+
+code-analysis:
+	black . ;\
+	flake8 ./hotel_reservation ;\
+	flake8 ./tests

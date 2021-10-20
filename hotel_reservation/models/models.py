@@ -61,7 +61,7 @@ class Reservation(Base):
     __tablename__ = "reservation"
     id = Column(Integer, autoincrement=True, primary_key=True)
     observations = Column(String(250), server_default="")
-    guest_id = Column(String(25), ForeignKey("guest.id"))
+    guest_id = Column(Integer, ForeignKey("guest.id"))
     guest = relationship("Guest", back_populates="reservation")
     room_reservations = relationship(
         "RoomReservation", back_populates="reservation", cascade="all, delete"
@@ -78,7 +78,8 @@ class Reservation(Base):
 
 class Guest(Base):
     __tablename__ = "guest"
-    id = Column(String(25), primary_key=True)
+    id = Column(Integer, autoincrement=True, primary_key=True)
+    identification = Column(String(25), unique=True)
     full_name = Column(String(200))
     email = Column(String(50))
     phone_number = Column(BigInteger)

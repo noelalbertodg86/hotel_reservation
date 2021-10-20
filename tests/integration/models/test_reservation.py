@@ -5,7 +5,7 @@ import pytest
 from hotel_reservation.exceptions.reservation_exceptions import (
     DuplicatedReservationError,
 )
-from hotel_reservation.models.models import Guest, RoomReservation, Reservation
+from hotel_reservation.models.models import Guest
 from hotel_reservation.models.reservation import ReservationDAO
 from tests.integration.utils.reservation_test_utils import build_object_reservation
 
@@ -37,7 +37,7 @@ def test_should_create_a_reservations_with_same_guest_in_distinct_dates_when_cre
     reservation_days = [start_day, second_day]
 
     guest = Guest(
-        id=faker.pyint(),
+        identification=faker.pyint(),
         full_name=faker.name(),
         email=faker.email(),
         phone_number=faker.msisdn(),

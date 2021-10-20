@@ -7,7 +7,7 @@ try:
     room = Room(number=101)
     hotel.rooms.append(room)
     guest = Guest(
-        id="123456789",
+        identification="123456789",
         full_name="Jhon Snow",
         email="jhon@winterfall.com",
         phone_number=9988776655,

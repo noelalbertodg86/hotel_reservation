@@ -16,5 +16,5 @@ class InvalidValidatorClass(HTTPException):
 
 class UnauthorizedDaysRangeForBooking(HTTPException):
     def __init__(self, reservation_rule: ReservationRules):
-        msg = f"Only {reservation_rule.value} days is allowed for booking in advance"
+        msg = f"Reservations need to be made with at least {reservation_rule.value} days in advance"
         HTTPException.__init__(self, status_code=status.HTTP_409_CONFLICT, detail=msg)

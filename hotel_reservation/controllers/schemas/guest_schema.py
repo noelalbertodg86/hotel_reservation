@@ -8,7 +8,7 @@ from hotel_reservation.models.models import Guest
 
 
 class GuestSchema(BaseModel):
-    id: str
+    identification: str
     full_name: str
     email: str
     phone_number: Optional[str]
@@ -30,7 +30,7 @@ class GuestSchema(BaseModel):
     @staticmethod
     def build_from_guest_data_model(guest_data_model: Guest):
         return GuestSchema(
-            id=guest_data_model.id,
+            identification=guest_data_model.identification,
             full_name=guest_data_model.full_name,
             email=guest_data_model.email,
             phone_number=guest_data_model.phone_number,

@@ -12,7 +12,7 @@ class ReservationRuleDAO:
     def get_active_rules(self) -> Optional[List[ReservationRules]]:
         return (
             self.session.query(ReservationRules)
-            .filter(ReservationRules.active == True)
+            .filter(ReservationRules.active is True)
             .all()
         )
 

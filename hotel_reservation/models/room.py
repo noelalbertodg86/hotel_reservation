@@ -3,7 +3,7 @@ from datetime import date
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
-from hotel_reservation.models.models import Room, RoomReservation, Reservation
+from hotel_reservation.models.models import Room, RoomReservation
 
 
 class RoomDAO:

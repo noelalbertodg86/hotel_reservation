@@ -6,8 +6,7 @@ from sqlalchemy.orm import Session
 from hotel_reservation.exceptions.reservation_exceptions import (
     DuplicatedReservationError,
 )
-from hotel_reservation.exceptions.reservation_exceptions import NotFoundReservationError
-from hotel_reservation.models.models import Reservation, RoomReservation
+from hotel_reservation.models.models import Reservation
 
 
 class ReservationDAO:

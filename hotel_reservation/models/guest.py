@@ -10,4 +10,6 @@ class GuestDAO:
         self.session = session
 
     def get_guest_by_id(self, guest_id: str) -> Optional[Guest]:
-        return self.session.query(Guest).get(guest_id)
+        return (
+            self.session.query(Guest).filter(Guest.identification == guest_id).first()
+        )

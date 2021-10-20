@@ -2,7 +2,7 @@ import pytest
 from faker import Faker
 
 from database import session_factory
-from hotel_reservation.models.models import Reservation, RoomReservation
+from hotel_reservation.models.models import Reservation, RoomReservation, Guest
 
 
 @pytest.fixture(scope="session")
@@ -23,4 +23,5 @@ def clean_test_data():
     local_session = session_factory()
     local_session.query(RoomReservation).delete()
     local_session.query(Reservation).delete()
+    local_session.query(Guest).delete()
     local_session.commit()

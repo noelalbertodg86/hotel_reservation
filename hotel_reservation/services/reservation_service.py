@@ -1,4 +1,4 @@
-from datetime import date, timedelta, datetime
+from datetime import datetime
 
 from sqlalchemy.orm import Session
 
@@ -36,7 +36,7 @@ class ReservationService:
     def create(
         self, reservation_request: ReservationRequestSchema
     ) -> ReservationCreatedSchema:
-        guest = self.guest_dao.get_guest_by_id(reservation_request.guest.id)
+        guest = self.guest_dao.get_guest_by_id(reservation_request.guest.identification)
         if not guest:
             guest = Guest(**reservation_request.guest.dict())
 
@@ -49,7 +49,7 @@ class ReservationService:
             observations=reservation_request.observations,
             room_reservations=room_reservations,
             guest=guest,
-            guest_id=reservation_request.guest.id,
+            guest_id=reservation_request.guest.identification,
         )
 
         self.validate_reservation(reservation)
@@ -78,6 +78,9 @@ class ReservationService:
         reservation_to_update.guest.phone_number = (
             update_reservation_request.guest.phone_number
         )
+        reservation_to_update.guest.identification = (
+            update_reservation_request.guest.identification
+        )
         reservation_to_update.guest.full_name = (
             update_reservation_request.guest.full_name
         )
@@ -85,8 +88,10 @@ class ReservationService:
             self.session.delete(room_reservation)
 
         reservation_to_update.room_reservations = [
-            RoomReservation(date=date, room_id=update_reservation_request.room_id)
-            for date in update_reservation_request.dates
+            RoomReservation(
+                date=reservation_date, room_id=update_reservation_request.room_id
+            )
+            for reservation_date in update_reservation_request.dates
         ]
         self.validate_reservation(reservation_to_update)
         updated_reservation = self.reservation_dao.update(reservation_to_update)
