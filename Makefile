@@ -1,18 +1,18 @@
-db-reset:
-	rm sql_app.db; \
+db:
+	rm hotel_reservation.db; \
 	rm migrations/versions/* ; \
 	pipenv run makemigrations ; \
 	pipenv run migrate
 
 
-start: db-reset
+start: db
 	pipenv run seed
 	pipenv run start
 
 unit-test:
 	pipenv run pytest tests/unit
 
-int-test: db-reset
+int-test: db
 	pipenv run seed
 	pipenv run pytest tests/integration
 
