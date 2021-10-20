@@ -1,7 +1,7 @@
 import pytest
 from faker import Faker
 
-from database import session_factory
+from hotel_reservation.database import session_factory
 from hotel_reservation.models.models import Reservation, RoomReservation, Guest
 
 

@@ -8,8 +8,12 @@
 - SQLite
 - Alembic
 
+## Installing needed libraries 
+```shell script
+pipenv install
+```
 
-## Running App
+## Running App Locally
 - Creating database
 ```shell script
 make db
@@ -39,17 +43,24 @@ pipenv run start
 - Running tests
 ```shell script
 make test
-make unit-test
-make int-test
 ```
 or
 ```shell script
 pipenv run pipenv run pytest tests/unit
 pipenv run pytest tests/integration
 ```
+## Running App in Docker
+If you have Docker installed on your machine to run the App just execute:
+```shell script
+make start-w-docker
+```
 
 # Description
-The app was made using an layer architecture(Controllers, Services, Models).
+The app architecture was made using patterns as multi-layer and client server
+#### Layers
+- Controllers (Manage user interfaces)
+- Services (Business logic)
+- Models (Database access)
 
 ## Endpoints documentation
 Endpoints documentation and schemas are generated in swagger taking advantage of this FastAPI feature.

@@ -3,7 +3,7 @@ from fastapi import FastAPI, HTTPException, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
-from database import session_factory
+from hotel_reservation.database import session_factory
 from hotel_reservation import config
 from hotel_reservation.controllers.reservation_controller import (
     router as reservation_router,

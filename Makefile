@@ -5,9 +5,8 @@ db:
 	pipenv run migrate
 
 
-start: db
-	pipenv run seed
-	pipenv run start
+start:
+	./entrypoint.sh
 
 unit-test:
 	pipenv run pytest tests/unit
@@ -22,3 +21,10 @@ code-analysis:
 	flake8 ./tests
 
 test: unit-test int-test
+
+build-image:
+	docker build . --tag "hotel_reservation"
+
+start-w-docker: build-image
+	docker run -p 8080:8080 hotel_reservation
+
