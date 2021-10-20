@@ -1,10 +1,10 @@
 from datetime import date, timedelta
-from fastapi import status
+
 import pytest
+from fastapi import status
 
 from hotel_reservation.exceptions.reservation_rules_exceptions import (
-    InvalidReservationStayError,
-    UnauthorizedDaysRangeForBooking,
+    ReservationValidatorError,
 )
 from hotel_reservation.models.models import (
     ReservationRules,
@@ -55,7 +55,7 @@ def test_validators_should_raise_error_when_reservation_with_more_than_3_days_is
     with pytest.raises(Exception) as validator_exception:
         [validator.validate(reservation) for validator in validators]
 
-    assert isinstance(validator_exception.value, InvalidReservationStayError)
+    assert isinstance(validator_exception.value, ReservationValidatorError)
     assert validator_exception.value.status_code == status.HTTP_409_CONFLICT
     assert validator_exception.value.detail == "Max allowed reservation stay is 3 days"
 
@@ -79,11 +79,11 @@ def test_validators_should_raise_error_when_reservation_is_booked_for_the_same_d
     with pytest.raises(Exception) as validator_exception:
         [validator.validate(reservation) for validator in validators]
 
-    assert isinstance(validator_exception.value, UnauthorizedDaysRangeForBooking)
+    assert isinstance(validator_exception.value, ReservationValidatorError)
     assert validator_exception.value.status_code == status.HTTP_409_CONFLICT
     assert (
         validator_exception.value.detail
-        == "Reservations need to be made with at least 1 days in advance"
+        == "Reservations must be made with at least 1 day in advance"
     )
 
 
@@ -106,11 +106,11 @@ def test_validators_should_raise_error_when_reservation_is_booked_for_more_than_
     with pytest.raises(Exception) as validator_exception:
         [validator.validate(reservation) for validator in validators]
 
-    assert isinstance(validator_exception.value, UnauthorizedDaysRangeForBooking)
+    assert isinstance(validator_exception.value, ReservationValidatorError)
     assert validator_exception.value.status_code == status.HTTP_409_CONFLICT
     assert (
         validator_exception.value.detail
-        == "Reservations need to be made with at least 30 days in advance"
+        == "Reservations must be made until 30 days in advance"
     )
 
 

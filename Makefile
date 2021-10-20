@@ -20,3 +20,5 @@ code-analysis:
 	black . ;\
 	flake8 ./hotel_reservation ;\
 	flake8 ./tests
+
+test: unit-test int-test

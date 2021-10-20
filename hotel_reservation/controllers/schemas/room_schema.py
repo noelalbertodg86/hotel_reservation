@@ -9,5 +9,5 @@ class RoomBaseSchema(BaseModel):
 
 
 class RoomAvailabilityDatesSchema(RoomBaseSchema):
-    message: str = "Room availability in the next 30 days"
+    message: str = f"Room availability"
     available_dates: List[date]

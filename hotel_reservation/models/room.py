@@ -1,4 +1,5 @@
 from datetime import date
+from typing import List
 
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
@@ -12,7 +13,7 @@ class RoomDAO:
 
     def get_room_booked_dates(
         self, start_date: date, end_date: date, room_id: int
-    ) -> RoomReservation:
+    ) -> List[RoomReservation]:
         reservation_dates = (
             self.session.query(RoomReservation)
             .filter(
