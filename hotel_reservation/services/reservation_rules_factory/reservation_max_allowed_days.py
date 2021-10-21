@@ -1,6 +1,6 @@
 from hotel_reservation.exceptions.reservation_rules_exceptions import (
     InvalidValidatorClass,
-    ReservationValidatorError,
+    ReservationMaxAllowedDaysError,
 )
 from hotel_reservation.models.models import (
     Reservation,
@@ -24,6 +24,5 @@ class ReservationMaxAllowedDays(ReservationRuleValidator):
     def validate(self, reservation: Reservation) -> bool:
         reservation_len = len(reservation.room_reservations)
         if reservation_len > self.reservation_rule.value:
-            msg = f"Max allowed reservation stay is {self.reservation_rule.value} days"
-            raise ReservationValidatorError(msg)
+            raise ReservationMaxAllowedDaysError(self.reservation_rule)
         return True

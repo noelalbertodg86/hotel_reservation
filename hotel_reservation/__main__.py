@@ -3,7 +3,6 @@ from fastapi import FastAPI, HTTPException, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
-from hotel_reservation.database import session_factory
 from hotel_reservation import config
 from hotel_reservation.controllers.reservation_controller import (
     router as reservation_router,
@@ -12,14 +11,6 @@ from hotel_reservation.controllers.room_controlller import router as room_router
 from hotel_reservation.logs import get_logger
 
 logger = get_logger()
-
-
-def get_session():
-    db = session_factory()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 app = FastAPI()

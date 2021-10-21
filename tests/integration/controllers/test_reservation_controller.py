@@ -11,6 +11,12 @@ from hotel_reservation.controllers.reservation_controller import (
 from hotel_reservation.controllers.schemas.reservation_schemas import (
     ReservationUpdatedSchema,
 )
+from hotel_reservation.exceptions.reservation_rules_exceptions import (
+    ReservationMaxAllowedDaysError,
+    ReservationDaysToReservateInAdvanceError,
+    ReservationDaysToReservateError,
+)
+
 from tests.integration.utils.reservation_test_utils import (
     build_object_reservation,
     create_reservation_for_testing_purposes,
@@ -20,16 +26,21 @@ from tests.integration.utils.reservation_test_utils import (
 client = TestClient(reservation_router)
 
 
-def test_should_return_201_status_and_create_a_reservation_successfully():
+def test_should_return_201_status_and_create_a_reservation_successfully(db_session):
     create_reservation_url = "/v1/reservation/"
-    response = client.post(create_reservation_url, json=RESERVATION_PAYLOAD)
+    response = client.post(create_reservation_url, json=reservation_payload())
 
     assert response.status_code == status.HTTP_201_CREATED
-    assert int(response.json()["confirmation_number"]) >= 0
+    assert (
+        select_reservation_by_id(
+            db_session, int(response.json()["confirmation_number"])
+        )
+        is not None
+    )
 
 
 def test_should_return_400_status_bad_request_when_a_payload_with_wrong_email_is_given():
-    payload_with_wrong_email = copy.deepcopy(RESERVATION_PAYLOAD)
+    payload_with_wrong_email = copy.deepcopy(reservation_payload())
     payload_with_wrong_email["guest"]["email"] = "noelgmail.com"
     create_reservation_url = "/v1/reservation/"
     with pytest.raises(HTTPException) as wrong_email_error:
@@ -40,7 +51,7 @@ def test_should_return_400_status_bad_request_when_a_payload_with_wrong_email_is
 
 
 def test_should_return_400_status_bad_request_when_a_paylod_with_wrong_phone_number_is_given():
-    payload_with_wrong_phone = copy.deepcopy(RESERVATION_PAYLOAD)
+    payload_with_wrong_phone = copy.deepcopy(reservation_payload())
     payload_with_wrong_phone["guest"]["phone_number"] = "12233445AX"
     create_reservation_url = "/v1/reservation/"
     with pytest.raises(HTTPException) as wrong_phone_error:
@@ -52,7 +63,7 @@ def test_should_return_400_status_bad_request_when_a_paylod_with_wrong_phone_num
 
 def test_should_return_409_status_conflict_when_a_reservation_is_duplicated(faker):
     create_reservation_url = "/v1/reservation/"
-    new_guest_reservation = copy.deepcopy(RESERVATION_PAYLOAD)
+    new_guest_reservation = copy.deepcopy(reservation_payload())
     guest_1 = {
         "identification": faker.pyint(),
         "full_name": faker.name(),
@@ -81,7 +92,7 @@ def test_should_return_409_status_conflict_when_a_reservation_is_duplicated(fake
 
     assert duplicated_reservation.value.status_code == status.HTTP_409_CONFLICT
     expected_error_message = (
-        f"Duplicated reservation. Room: 1, Dates: {RESERVATION_PAYLOAD['dates']}"
+        f"Duplicated reservation. Room: 1, Dates: {reservation_payload()['dates']}"
     )
     assert duplicated_reservation.value.detail == expected_error_message
 
@@ -97,7 +108,7 @@ def test_should_update_a_reservation_and_return_200_when_update_reservation_endp
     reservation = create_reservation_for_testing_purposes(db_session, reservation)
 
     create_reservation_url = f"/v1/reservation/{reservation.id}"
-    response = client.put(create_reservation_url, json=RESERVATION_PAYLOAD)
+    response = client.put(create_reservation_url, json=reservation_payload())
 
     assert response.status_code == status.HTTP_200_OK
     updated_reservation = select_reservation_by_id(
@@ -120,25 +131,70 @@ def test_should_delete_a_reservation_and_return_200_when_delete_reservation_endp
     reservation = build_object_reservation(faker, room_id, reservation_days, "")
     reservation = create_reservation_for_testing_purposes(db_session, reservation)
 
-    create_reservation_url = f"/v1/reservation/{reservation.id}"
-    response = client.delete(create_reservation_url)
+    update_reservation_url = f"/v1/reservation/{reservation.id}"
+    response = client.delete(update_reservation_url)
 
     assert response.status_code == status.HTTP_200_OK
     assert not select_reservation_by_id(db_session, reservation.id)
 
 
-RESERVATION_PAYLOAD = {
-    "dates": [
-        f"{date.today() + timedelta(days=15)}",
-        f"{date.today() + timedelta(days=16)}",
-        f"{date.today() + timedelta(days=17)}",
-    ],
-    "guest": {
-        "identification": "13131313",
-        "full_name": "Noel Diaz",
-        "email": "noel@gmail.com",
-        "phone_number": "1234567890",
-    },
-    "room_id": 1,
-    "observations": "Room with seaview",
-}
+def test_should_raise_409_validation_error_when_a_reservation_with_more_than_3_days_is_send():
+    start_day = date.today() + timedelta(days=10)
+    reservation_with_5_days = [str(start_day + timedelta(days=i)) for i in range(5)]
+    payload = reservation_payload()
+    payload["dates"] = reservation_with_5_days
+
+    create_reservation_url = "/v1/reservation/"
+    with pytest.raises(HTTPException) as unauthorized_reservation:
+        client.post(create_reservation_url, json=payload)
+
+    assert isinstance(unauthorized_reservation.value, ReservationMaxAllowedDaysError)
+    assert unauthorized_reservation.value.status_code == status.HTTP_409_CONFLICT
+
+
+def test_should_raise_409_validation_error_when_a_reservation_with_more_than_30_days_in_advance_is_send():
+    start_day = date.today() + timedelta(days=31)
+    reservation_days = [str(start_day + timedelta(days=i)) for i in range(3)]
+    payload = reservation_payload()
+    payload["dates"] = reservation_days
+
+    create_reservation_url = "/v1/reservation/"
+    with pytest.raises(HTTPException) as unauthorized_reservation:
+        client.post(create_reservation_url, json=payload)
+
+    assert isinstance(
+        unauthorized_reservation.value, ReservationDaysToReservateInAdvanceError
+    )
+    assert unauthorized_reservation.value.status_code == status.HTTP_409_CONFLICT
+
+
+def test_should_raise_409_validation_error_when_a_reservation_for_today_is_send():
+    start_day = date.today()
+    reservation_days = [str(start_day + timedelta(days=i)) for i in range(3)]
+    payload = reservation_payload()
+    payload["dates"] = reservation_days
+
+    create_reservation_url = "/v1/reservation/"
+    with pytest.raises(HTTPException) as unauthorized_reservation:
+        client.post(create_reservation_url, json=payload)
+
+    assert isinstance(unauthorized_reservation.value, ReservationDaysToReservateError)
+    assert unauthorized_reservation.value.status_code == status.HTTP_409_CONFLICT
+
+
+def reservation_payload():
+    return {
+        "dates": [
+            f"{date.today() + timedelta(days=15)}",
+            f"{date.today() + timedelta(days=16)}",
+            f"{date.today() + timedelta(days=17)}",
+        ],
+        "guest": {
+            "identification": "13131313",
+            "full_name": "Noel Diaz",
+            "email": "noel@gmail.com",
+            "phone_number": "1234567890",
+        },
+        "room_id": 1,
+        "observations": "Room with seaview",
+    }

@@ -4,7 +4,9 @@ import pytest
 from fastapi import status
 
 from hotel_reservation.exceptions.reservation_rules_exceptions import (
-    ReservationValidatorError,
+    ReservationMaxAllowedDaysError,
+    ReservationDaysToReservateError,
+    ReservationDaysToReservateInAdvanceError,
 )
 from hotel_reservation.models.models import (
     ReservationRules,
@@ -55,7 +57,7 @@ def test_validators_should_raise_error_when_reservation_with_more_than_3_days_is
     with pytest.raises(Exception) as validator_exception:
         [validator.validate(reservation) for validator in validators]
 
-    assert isinstance(validator_exception.value, ReservationValidatorError)
+    assert isinstance(validator_exception.value, ReservationMaxAllowedDaysError)
     assert validator_exception.value.status_code == status.HTTP_409_CONFLICT
     assert validator_exception.value.detail == "Max allowed reservation stay is 3 days"
 
@@ -79,7 +81,7 @@ def test_validators_should_raise_error_when_reservation_is_booked_for_the_same_d
     with pytest.raises(Exception) as validator_exception:
         [validator.validate(reservation) for validator in validators]
 
-    assert isinstance(validator_exception.value, ReservationValidatorError)
+    assert isinstance(validator_exception.value, ReservationDaysToReservateError)
     assert validator_exception.value.status_code == status.HTTP_409_CONFLICT
     assert (
         validator_exception.value.detail
@@ -106,7 +108,9 @@ def test_validators_should_raise_error_when_reservation_is_booked_for_more_than_
     with pytest.raises(Exception) as validator_exception:
         [validator.validate(reservation) for validator in validators]
 
-    assert isinstance(validator_exception.value, ReservationValidatorError)
+    assert isinstance(
+        validator_exception.value, ReservationDaysToReservateInAdvanceError
+    )
     assert validator_exception.value.status_code == status.HTTP_409_CONFLICT
     assert (
         validator_exception.value.detail

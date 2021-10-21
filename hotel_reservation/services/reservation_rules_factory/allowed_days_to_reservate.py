@@ -2,7 +2,7 @@ from datetime import date
 
 from hotel_reservation.exceptions.reservation_rules_exceptions import (
     InvalidValidatorClass,
-    ReservationValidatorError,
+    ReservationDaysToReservateError,
 )
 from hotel_reservation.models.models import (
     Reservation,
@@ -34,6 +34,5 @@ class MinAllowedDaysToReservate(ReservationRuleValidator):
             ]
         )
         if (reservation_start_day - today).days < self.reservation_rule.value:
-            msg = f"Reservations must be made with at least {self.reservation_rule.value} day in advance"
-            raise ReservationValidatorError(msg)
+            raise ReservationDaysToReservateError(self.reservation_rule)
         return True
