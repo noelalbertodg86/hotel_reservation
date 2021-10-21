@@ -10,7 +10,8 @@
 
 ## Installing needed libraries 
 ```shell script
-pipenv install
+pipenv shell
+pipenv sync
 ```
 
 ## Running App Locally
