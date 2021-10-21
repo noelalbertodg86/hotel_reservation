@@ -14,7 +14,7 @@ To run the App locally it is needed (Python 3.8 and pipenv)
 Once you get into the project main folder `hotel_reservation` execute:
 ```shell script
 pipenv shell
-pipenv sync
+pipenv install --dev
 ```
 
 ## Running App Locally
