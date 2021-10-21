@@ -1,8 +1,7 @@
 import copy
 from datetime import date, timedelta
 
-import pytest
-from fastapi import status, HTTPException
+from fastapi import status, FastAPI
 from fastapi.testclient import TestClient
 
 from hotel_reservation.controllers.reservation_controller import (
@@ -11,19 +10,18 @@ from hotel_reservation.controllers.reservation_controller import (
 from hotel_reservation.controllers.schemas.reservation_schemas import (
     ReservationUpdatedSchema,
 )
-from hotel_reservation.exceptions.reservation_rules_exceptions import (
-    ReservationMaxAllowedDaysError,
-    ReservationDaysToReservateInAdvanceError,
-    ReservationDaysToReservateError,
-)
-
+from hotel_reservation.database import get_db
 from tests.integration.utils.reservation_test_utils import (
     build_object_reservation,
     create_reservation_for_testing_purposes,
     select_reservation_by_id,
 )
 
-client = TestClient(reservation_router)
+app = FastAPI()
+app.include_router(reservation_router)
+client = TestClient(app)
+
+app.dependency_overrides[get_db] = get_db
 
 
 def test_should_return_201_status_and_create_a_reservation_successfully(db_session):
@@ -43,22 +41,20 @@ def test_should_return_400_status_bad_request_when_a_payload_with_wrong_email_is
     payload_with_wrong_email = copy.deepcopy(reservation_payload())
     payload_with_wrong_email["guest"]["email"] = "noelgmail.com"
     create_reservation_url = "/v1/reservation/"
-    with pytest.raises(HTTPException) as wrong_email_error:
-        client.post(create_reservation_url, json=payload_with_wrong_email)
+    error_response = client.post(create_reservation_url, json=payload_with_wrong_email)
 
-    assert wrong_email_error.value.status_code == status.HTTP_400_BAD_REQUEST
-    assert wrong_email_error.value.detail == "Invalid email address"
+    assert error_response.status_code == status.HTTP_400_BAD_REQUEST
+    assert error_response.json()["detail"] == "Invalid email address"
 
 
 def test_should_return_400_status_bad_request_when_a_paylod_with_wrong_phone_number_is_given():
     payload_with_wrong_phone = copy.deepcopy(reservation_payload())
     payload_with_wrong_phone["guest"]["phone_number"] = "12233445AX"
     create_reservation_url = "/v1/reservation/"
-    with pytest.raises(HTTPException) as wrong_phone_error:
-        client.post(create_reservation_url, json=payload_with_wrong_phone)
+    error_response = client.post(create_reservation_url, json=payload_with_wrong_phone)
 
-    assert wrong_phone_error.value.status_code == status.HTTP_400_BAD_REQUEST
-    assert wrong_phone_error.value.detail == "Invalid phone number"
+    assert error_response.status_code == status.HTTP_400_BAD_REQUEST
+    assert error_response.json()["detail"] == "Invalid phone number"
 
 
 def test_should_return_409_status_conflict_when_a_reservation_is_duplicated(faker):
@@ -87,14 +83,13 @@ def test_should_return_409_status_conflict_when_a_reservation_is_duplicated(fake
 
     new_guest_reservation["guest"] = guest_2
 
-    with pytest.raises(HTTPException) as duplicated_reservation:
-        client.post(create_reservation_url, json=new_guest_reservation)
+    error_response = client.post(create_reservation_url, json=new_guest_reservation)
 
-    assert duplicated_reservation.value.status_code == status.HTTP_409_CONFLICT
+    assert error_response.status_code == status.HTTP_409_CONFLICT
     expected_error_message = (
         f"Duplicated reservation. Room: 1, Dates: {reservation_payload()['dates']}"
     )
-    assert duplicated_reservation.value.detail == expected_error_message
+    assert error_response.json()["detail"] == expected_error_message
 
 
 def test_should_update_a_reservation_and_return_200_when_update_reservation_endpoint_is_called(
@@ -145,11 +140,11 @@ def test_should_raise_409_validation_error_when_a_reservation_with_more_than_3_d
     payload["dates"] = reservation_with_5_days
 
     create_reservation_url = "/v1/reservation/"
-    with pytest.raises(HTTPException) as unauthorized_reservation:
-        client.post(create_reservation_url, json=payload)
+    error_response = client.post(create_reservation_url, json=payload)
 
-    assert isinstance(unauthorized_reservation.value, ReservationMaxAllowedDaysError)
-    assert unauthorized_reservation.value.status_code == status.HTTP_409_CONFLICT
+    assert error_response.status_code == status.HTTP_409_CONFLICT
+    msg = f"Max allowed reservation stay is 3 days"
+    assert error_response.json()["detail"] == msg
 
 
 def test_should_raise_409_validation_error_when_a_reservation_with_more_than_30_days_in_advance_is_send():
@@ -159,13 +154,11 @@ def test_should_raise_409_validation_error_when_a_reservation_with_more_than_30_
     payload["dates"] = reservation_days
 
     create_reservation_url = "/v1/reservation/"
-    with pytest.raises(HTTPException) as unauthorized_reservation:
-        client.post(create_reservation_url, json=payload)
+    error_response = client.post(create_reservation_url, json=payload)
 
-    assert isinstance(
-        unauthorized_reservation.value, ReservationDaysToReservateInAdvanceError
-    )
-    assert unauthorized_reservation.value.status_code == status.HTTP_409_CONFLICT
+    assert error_response.status_code == status.HTTP_409_CONFLICT
+    msg = f"Reservations must be made until 30 days in advance"
+    assert error_response.json()["detail"] == msg
 
 
 def test_should_raise_409_validation_error_when_a_reservation_for_today_is_send():
@@ -175,11 +168,11 @@ def test_should_raise_409_validation_error_when_a_reservation_for_today_is_send(
     payload["dates"] = reservation_days
 
     create_reservation_url = "/v1/reservation/"
-    with pytest.raises(HTTPException) as unauthorized_reservation:
-        client.post(create_reservation_url, json=payload)
+    error_response = client.post(create_reservation_url, json=payload)
 
-    assert isinstance(unauthorized_reservation.value, ReservationDaysToReservateError)
-    assert unauthorized_reservation.value.status_code == status.HTTP_409_CONFLICT
+    msg = f"Reservations must be made with at least 1 day in advance"
+    assert error_response.status_code == status.HTTP_409_CONFLICT
+    assert error_response.json()["detail"] == msg
 
 
 def reservation_payload():

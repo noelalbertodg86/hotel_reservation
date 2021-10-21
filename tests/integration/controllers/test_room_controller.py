@@ -1,18 +1,23 @@
 from datetime import date, timedelta, datetime
 
 import pytest
-from fastapi import status, HTTPException
+from fastapi import status, HTTPException, FastAPI
 from fastapi.testclient import TestClient
 from hotel_reservation.controllers.room_controlller import (
     router as room_router,
 )
+from hotel_reservation.database import get_db
 from hotel_reservation.exceptions.room_exceptions import NotFoundRoomError
 from tests.integration.utils.reservation_test_utils import (
     build_object_reservation,
     create_reservation_for_testing_purposes,
 )
 
-client = TestClient(room_router)
+app = FastAPI()
+app.include_router(room_router)
+client = TestClient(app)
+
+app.dependency_overrides[get_db] = get_db
 
 
 def test_should_return_room_availability_when_get_availability_method_is_called(
@@ -50,8 +55,9 @@ def test_should_return_room_availability_when_get_availability_method_is_called(
 def test_should_return_404_status_not_found_when_a_wrong_room_is_given():
     wrong_room_id = 99999
 
-    with pytest.raises(HTTPException) as wrong_phone_error:
-        client.get(f"/v1/room/availability/{wrong_room_id}")
+    error_response = client.get(f"/v1/room/availability/{wrong_room_id}")
 
-    assert isinstance(wrong_phone_error.value, NotFoundRoomError)
-    assert wrong_phone_error.value.status_code == status.HTTP_404_NOT_FOUND
+    assert error_response.status_code == status.HTTP_404_NOT_FOUND
+    assert (
+        error_response.json()["detail"] == f"Room with number:{wrong_room_id} Not Found"
+    )
