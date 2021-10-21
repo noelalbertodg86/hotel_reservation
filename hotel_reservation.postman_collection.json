@@ -1,0 +1,147 @@
+{
+	"info": {
+		"_postman_id": "68a3533c-a376-46ed-b539-c9f1992ce69b",
+		"name": "hotel_reservation",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "create_reservation",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"dates\": [\"2021-10-29\",\"2021-10-30\", \"2021-10-31\"],\n    \"guest\": {\n        \"identification\": \"202020202\",\n        \"full_name\": \"Noel Diaz\",\n        \"email\": \"noel@gmail.com\",\n        \"phone_number\": \"1234567890\"\n    },\n    \"room_id\": 1,\n    \"observations\": \"Room with seaview\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://0.0.0.0:8080/v1/reservation",
+					"protocol": "http",
+					"host": [
+						"0",
+						"0",
+						"0",
+						"0"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"reservation"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get room availability",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://0.0.0.0:8080/v1/room/availability/1",
+					"protocol": "http",
+					"host": [
+						"0",
+						"0",
+						"0",
+						"0"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"room",
+						"availability",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update reservation",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"dates\": [\"2021-10-22\",\"2021-10-23\", \"2021-10-24\"],\n    \"guest\": {\n        \"identification\": \"7777\",\n        \"full_name\": \"Noel Diaz 777\",\n        \"email\": \"noel5555@gmail.com\",\n        \"phone_number\": \"09988155577\"\n    },\n    \"room_id\": 1,\n    \"observations\": \"Room with seaview 777\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://0.0.0.0:8080/v1/reservation/1",
+					"protocol": "http",
+					"host": [
+						"0",
+						"0",
+						"0",
+						"0"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"reservation",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get reservation by confirmation number",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://0.0.0.0:8080/v1/reservation/1",
+					"protocol": "http",
+					"host": [
+						"0",
+						"0",
+						"0",
+						"0"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"reservation",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete reservation",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://0.0.0.0:8080/v1/reservation/1",
+					"protocol": "http",
+					"host": [
+						"0",
+						"0",
+						"0",
+						"0"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"reservation",
+						"1"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
