@@ -1,13 +1,12 @@
 from datetime import date, timedelta, datetime
 
-import pytest
-from fastapi import status, HTTPException, FastAPI
+from fastapi import status, FastAPI
 from fastapi.testclient import TestClient
+
 from hotel_reservation.controllers.room_controlller import (
     router as room_router,
 )
 from hotel_reservation.database import get_db
-from hotel_reservation.exceptions.room_exceptions import NotFoundRoomError
 from tests.integration.utils.reservation_test_utils import (
     build_object_reservation,
     create_reservation_for_testing_purposes,

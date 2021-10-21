@@ -143,7 +143,7 @@ def test_should_raise_409_validation_error_when_a_reservation_with_more_than_3_d
     error_response = client.post(create_reservation_url, json=payload)
 
     assert error_response.status_code == status.HTTP_409_CONFLICT
-    msg = f"Max allowed reservation stay is 3 days"
+    msg = "Max allowed reservation stay is 3 days"
     assert error_response.json()["detail"] == msg
 
 
@@ -157,7 +157,7 @@ def test_should_raise_409_validation_error_when_a_reservation_with_more_than_30_
     error_response = client.post(create_reservation_url, json=payload)
 
     assert error_response.status_code == status.HTTP_409_CONFLICT
-    msg = f"Reservations must be made until 30 days in advance"
+    msg = "Reservations must be made until 30 days in advance"
     assert error_response.json()["detail"] == msg
 
 
@@ -170,7 +170,7 @@ def test_should_raise_409_validation_error_when_a_reservation_for_today_is_send(
     create_reservation_url = "/v1/reservation/"
     error_response = client.post(create_reservation_url, json=payload)
 
-    msg = f"Reservations must be made with at least 1 day in advance"
+    msg = "Reservations must be made with at least 1 day in advance"
     assert error_response.status_code == status.HTTP_409_CONFLICT
     assert error_response.json()["detail"] == msg
 
