@@ -1,8 +1,8 @@
 """Create hotel reservation models
 
-Revision ID: 80dba8627478
+Revision ID: be370b66bd4f
 Revises: 
-Create Date: 2021-10-21 10:11:00.533874
+Create Date: 2021-10-21 10:20:33.638890
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '80dba8627478'
+revision = 'be370b66bd4f'
 down_revision = None
 branch_labels = None
 depends_on = None
