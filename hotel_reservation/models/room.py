@@ -27,7 +27,7 @@ class RoomDAO:
         )
         return reservation_dates
 
-    def get_room(self, room_id: int = 0):
+    def get_room(self, room_id: int = 0) -> Room:
         if room_id:
             return self.session.query(Room).get(room_id)
         return self.session.query(Room).first()
