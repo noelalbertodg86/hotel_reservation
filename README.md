@@ -35,10 +35,6 @@ pipenv run seed
 ```shell script
 make start
 ```
-or
-```shell script
-pipenv run start
-```
 
 - Running tests
 ```shell script
