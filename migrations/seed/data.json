@@ -1,0 +1,34 @@
+[
+  {
+    "model": "hotel_reservation.models.models.Hotel",
+    "data": [
+      {
+        "name": "Unique Gran Cancun",
+        "address": "Cancun",
+        "!rooms": {
+          "model": "hotel_reservation.models.models.Room",
+          "data": {
+            "number": 101
+          }
+        }
+      }
+    ]
+  },
+  {
+    "model": "hotel_reservation.models.models.ReservationRules",
+    "data": [
+      {
+        "code": "RESERVE_MAX_ALLOWED_DAYS",
+        "value": 3
+      },
+      {
+        "code": "RESERVE_MAX_ALLOWED_BOOKING_IN_ADVANCE_DAYS",
+        "value": 30
+      },
+      {
+        "code": "RESERVE_MIN_ALLOWED_DAYS_BETWEEN_BOOK_AND_RESERVATION_BEGIN",
+        "value": 1
+      }
+    ]
+  }
+]
