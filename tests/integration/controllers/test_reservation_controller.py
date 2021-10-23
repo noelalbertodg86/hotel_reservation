@@ -126,11 +126,22 @@ def test_should_delete_a_reservation_and_return_200_when_delete_reservation_endp
     reservation = build_object_reservation(faker, room_id, reservation_days, "")
     reservation = create_reservation_for_testing_purposes(db_session, reservation)
 
-    update_reservation_url = f"/v1/reservation/{reservation.id}"
-    response = client.delete(update_reservation_url)
+    delete_reservation_url = f"/v1/reservation/{reservation.id}"
+    response = client.delete(delete_reservation_url)
 
     assert response.status_code == status.HTTP_200_OK
     assert not select_reservation_by_id(db_session, reservation.id)
+
+
+def test_should_raise_not_found_error_when_delete_reservation_endpoint_is_called_with_wrong_confirmation():
+    wrong_reservation_confirmation = 9999
+
+    delete_reservation_url = f"/v1/reservation/{wrong_reservation_confirmation}"
+    response = client.delete(delete_reservation_url)
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    msg = f"Reservation with confirmation number:{wrong_reservation_confirmation} Not Found"
+    assert response.json()["detail"] == msg
 
 
 def test_should_raise_409_validation_error_when_a_reservation_with_more_than_3_days_is_send():
