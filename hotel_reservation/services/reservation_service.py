@@ -24,9 +24,7 @@ class ReservationService:
         self.reservation_rules_service = ReservationRulesService(session)
 
     def get_reservation(self, confirmation_number: int) -> ReservationSelectedSchema:
-        reservation = self.reservation_dao.get_reservation_by_id(
-            reservation_id=confirmation_number
-        )
+        reservation = self.reservation_dao.get_by_id(model_id=confirmation_number)
         if not reservation:
             raise NotFoundReservationError(confirmation_number)
         return ReservationSelectedSchema.build_from_reservation_model(reservation)
@@ -34,7 +32,7 @@ class ReservationService:
     def create(
         self, reservation_request: ReservationRequestSchema
     ) -> ReservationCreatedSchema:
-        guest = self.guest_dao.get_guest_by_id(reservation_request.guest.identification)
+        guest = self.guest_dao.get_by_id(reservation_request.guest.identification)
         if not guest:
             guest = Guest(**reservation_request.guest.dict())
 
@@ -62,8 +60,8 @@ class ReservationService:
         confirmation_number: int,
     ) -> ReservationUpdatedSchema:
 
-        reservation_to_update = self.reservation_dao.get_reservation_by_id(
-            reservation_id=confirmation_number
+        reservation_to_update = self.reservation_dao.get_by_id(
+            model_id=confirmation_number
         )
         if not reservation_to_update:
             raise NotFoundReservationError(confirmation_number)
@@ -97,7 +95,7 @@ class ReservationService:
         )
 
     def delete(self, confirmation_number: int) -> ReservationDeletedSchema:
-        reservation = self.reservation_dao.get_reservation_by_id(confirmation_number)
+        reservation = self.reservation_dao.get_by_id(confirmation_number)
         if not reservation:
             raise NotFoundReservationError(confirmation_number)
 

@@ -34,7 +34,7 @@ class RoomServices:
             for i in range(max_allowed_days_to_book_in_advance)
         }
 
-        room = self.room_model.get_room(room_id=room_id)
+        room = self.room_model.get_by_id(room_id=room_id)
         if not room:
             raise NotFoundRoomError(room_id=room_id)
 

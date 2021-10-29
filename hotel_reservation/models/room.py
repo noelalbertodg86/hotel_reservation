@@ -4,12 +4,13 @@ from typing import List
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
+from hotel_reservation.models.model_base_dao import ModelBaseDAO
 from hotel_reservation.models.models import Room, RoomReservation
 
 
-class RoomDAO:
+class RoomDAO(ModelBaseDAO):
     def __init__(self, session: Session):
-        self.session = session
+        super().__init__(session)
 
     def get_room_booked_dates(
         self, start_date: date, end_date: date, room_id: int
@@ -27,7 +28,7 @@ class RoomDAO:
         )
         return reservation_dates
 
-    def get_room(self, room_id: int = 0) -> Room:
+    def get_by_id(self, room_id: int = 0) -> Room:
         if room_id:
             return self.session.query(Room).get(room_id)
         return self.session.query(Room).first()
